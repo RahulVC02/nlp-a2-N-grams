@@ -1,79 +1,51 @@
-import nltk
-import argparse
-from itertools import product
 import math
-from pathlib import Path
-from utils import preprocess, load_data, SOS, EOS, UNK
+from utils import preprocess, make_ngrams_dict, get_ngrams_list_from_sentence
 
 class LanguageModel(object):
-    def __init__(self, train_data, n, laplace=1):
+    def __init__(self, train_data, n, laplace=1, smoothing='laplace'):
         self.n = n
+        self.smoothing = smoothing
         self.laplace = laplace
-        self.tokens = preprocess(train_data, n)
-        self.vocab  = nltk.FreqDist(self.tokens)
-        self.model  = self._create_model()
-        self.masks  = list(reversed(list(product((0,1), repeat=n))))
 
-    def _smooth(self):
-    
-        vocab_size = len(self.vocab)
+        self.preprocessed_sentences = preprocess(train_data, n)
+        self.vocab = make_ngrams_dict(self.preprocessed_sentences, 1)
+        self.vocab_size = len(self.vocab)
 
-        n_grams = nltk.ngrams(self.tokens, self.n)
-        n_vocab = nltk.FreqDist(n_grams)
-
-        m_grams = nltk.ngrams(self.tokens, self.n-1)
-        m_vocab = nltk.FreqDist(m_grams)
-
-        def smoothed_count(n_gram, n_count):
-            m_gram = n_gram[:-1]
-            m_count = m_vocab[m_gram]
-            return (n_count + self.laplace) / (m_count + self.laplace * vocab_size)
-
-        return { n_gram: smoothed_count(n_gram, count) for n_gram, count in n_vocab.items() }
-
-    def _create_model(self):
-    
-        if self.n == 1:
-            num_tokens = len(self.tokens)
-            return { (unigram,): count / num_tokens for unigram, count in self.vocab.items() }
+        self.ngrams_dict = make_ngrams_dict(self.preprocessed_sentences, n)
+        if(n==1):
+            self.n_minus_one_grams_dict = {}
         else:
-            return self._smooth()
+            self.n_minus_one_grams_dict = make_ngrams_dict(self.preprocessed_sentences, n-1)
+    
+    def _predict_ngram_prob(self, ngram):
+        #TODO: Change the default value of these get() methods to incorporate smoothing
+        ngram_string = " ".join(ngram)
+        ngram_count = self.ngrams_dict.get(ngram_string, 1)
 
-    def _convert_oov(self, ngram):
-
-        mask = lambda ngram, bitmask: tuple((token if flag == 1 else UNK for token,flag in zip(ngram, bitmask)))
-
-        ngram = (ngram,) if type(ngram) is str else ngram
-        for possible_known in [mask(ngram, bitmask) for bitmask in self.masks]:
-            if possible_known in self.model:
-                return possible_known
-
-    def perplexity(self, test_data):
-
-        test_tokens = preprocess(test_data, self.n)
-        test_ngrams = nltk.ngrams(test_tokens, self.n)
-        N = len(test_tokens)
-
-        known_ngrams  = (self._convert_oov(ngram) for ngram in test_ngrams)
-        probabilities = [self.model[ngram] for ngram in known_ngrams]
-
-        return math.exp((-1/N) * sum(map(math.log, probabilities)))
-
-    def _best_candidate(self, prev, i, without=[]):
-        blacklist  = [UNK] + without
-        candidates = ((ngram[-1],prob) for ngram,prob in self.model.items() if ngram[:-1]==prev)
-        candidates = filter(lambda candidate: candidate[0] not in blacklist, candidates)
-        candidates = sorted(candidates, key=lambda candidate: candidate[1], reverse=True)
-        if len(candidates) == 0:
-            return (EOS, 1)
+        if(self.n>1):
+            n_minus_one_gram = ngram[:-1]
+            n_minus_one_gram_string = " ".join(n_minus_one_gram)
+            n_minus_one_gram_count = self.n_minus_one_grams_dict.get(n_minus_one_gram_string, self.vocab_size)
         else:
-            return candidates[0 if prev != () and prev[-1] != SOS else i]
+            n_minus_one_gram_count = self.vocab_size
 
-data_path = 'data/comments_unfiltered.csv'
-train, test = load_data(data_path)
+        return ngram_count / n_minus_one_gram_count
+        
+    def _get_sentence_perplexity(self, sentence):
+        N = len(sentence.split())
+        ngrams_list = get_ngrams_list_from_sentence(sentence, self.n)
+        sentence_perplexity = 1
+        for ngram in ngrams_list:
+            sentence_perplexity /= self._predict_ngram_prob(ngram)
+        
+        return math.pow(sentence_perplexity, 1/N)
+    
+    def get_total_perplexity(self, test_data):
+        test_sentences = preprocess(test_data, self.n)
+        num_sentences = len(test_sentences)
+        total_perplexity = 0
 
-model_instance= LanguageModel(train[0:1000000], 3, 0)
-print(model_instance.perplexity(test))
-
-prev=('I','love',)
-print(model_instance._best_candidate(prev,1)[0])
+        for sentence in test_sentences:
+            total_perplexity += self._get_sentence_perplexity(sentence)
+        
+        return total_perplexity / num_sentences
