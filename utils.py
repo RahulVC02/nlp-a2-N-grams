@@ -36,13 +36,14 @@ def counter(data, n, count_gram_dict):
 def freq_calc(count_gram_dict):
     freq_dict = {}
     for key in count_gram_dict:
-        freq_dict[count_gram_dict[key]] = freq_dict.get(key,0) + 1
+        freq_dict[count_gram_dict[key]] = freq_dict.get(count_gram_dict[key],0) + 1
     return freq_dict
 
-def GoodTuring_Count(token, count_gram_dict, freq_dict):
-    c = count_gram_dict[token]
+def goodTuring_ngram_count(ngram, count_gram_dict, freq_dict):
+    c = count_gram_dict[ngram]
     if c > 10:    #done for maintaining consistency after the count becomes large, can be done for different values for different models
         return c - 0.75
-    if (c == 0):
+    elif (c == 0):
         return freq_dict[1]
-    return (c+1)*freq_dict.get(c+1,0)/freq_dict[c]
+    else:
+        return (c+1)*freq_dict.get(c+1,0)/freq_dict[c]

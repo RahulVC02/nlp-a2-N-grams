@@ -5,22 +5,35 @@ all_sentences = pd.read_csv('data/final_sentences_final.csv', header=None)
 all_sentences = all_sentences.iloc[:,0]
 split_ratio = 0.8
 
-# all_comments = all_comments.sample(frac=1, random_state=42)  
+all_sentences = all_sentences.sample(frac=1, random_state=42)  
 num_train = int(len(all_sentences) * split_ratio)
-train_data = all_sentences[:num_train]
-test_data = all_sentences[num_train:]
+
+#actual train and test data
+actual_train_data = all_sentences[:num_train]
+actual_test_data = all_sentences[num_train:]
+
+#sanity check
+train_data = all_sentences
+test_data = train_data
 
 print("Train Data Size: ", len(train_data))
 print("Test Data Size: ", len(test_data))
 
+#flag to find log perplexity or normal perplexity
+calculate_log_perplexity=True
+
+#possible values for smoothing - unsmoothed, laplace, add-k, goodTuring
+smoothing_values = [None, 'laplace', 0.01, 0.1, 0.5, 2, 5, 10, 'goodTuring']
+
+#ngram models
 unigram_model = LanguageModel(train_data, test_data, 1)
-print("Unigram Perplexity: ", unigram_model.get_total_perplexity())
+print("Unigram Perplexity: ", unigram_model.get_total_perplexity(log=calculate_log_perplexity))
 
 bigram_model = LanguageModel(train_data, test_data, 2)
-print("Bigram Perplexity: ", bigram_model.get_total_perplexity())
+print("Bigram Perplexity: ", bigram_model.get_total_perplexity(log=calculate_log_perplexity))
 
 trigram_model = LanguageModel(train_data, test_data, 3)
-print("Trigram Perplexity: ", trigram_model.get_total_perplexity())
+print("Trigram Perplexity: ", trigram_model.get_total_perplexity(log=calculate_log_perplexity))
 
 quadgram_model = LanguageModel(train_data, test_data, 4)
-print("Quadgram Perplexity: ", quadgram_model.get_total_perplexity())
+print("Quadgram Perplexity: ", quadgram_model.get_total_perplexity(log=calculate_log_perplexity))
