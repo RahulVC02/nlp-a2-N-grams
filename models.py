@@ -13,14 +13,14 @@ test_data = all_sentences[num_train:]
 print("Train Data Size: ", len(train_data))
 print("Test Data Size: ", len(test_data))
 
-unigram_model = LanguageModel(train_data, 1)
-print("Unigram Perplexity: ", unigram_model.get_total_perplexity(test_data))
+unigram_model = LanguageModel(train_data, test_data, 1)
+print("Unigram Perplexity: ", unigram_model.get_total_perplexity())
 
-bigram_model = LanguageModel(train_data, 2)
-print("Bigram Perplexity: ", bigram_model.get_total_perplexity(test_data))
+bigram_model = LanguageModel(train_data, test_data, 2)
+print("Bigram Perplexity: ", bigram_model.get_total_perplexity())
 
-trigram_model = LanguageModel(train_data, 3)
-print("Trigram Perplexity: ", trigram_model.get_total_perplexity(test_data))
+trigram_model = LanguageModel(train_data, test_data, 3)
+print("Trigram Perplexity: ", trigram_model.get_total_perplexity())
 
-quadgram_model = LanguageModel(train_data, 4)
-print("Quadgram Perplexity: ", quadgram_model.get_total_perplexity(test_data))
+quadgram_model = LanguageModel(train_data, test_data, 4)
+print("Quadgram Perplexity: ", quadgram_model.get_total_perplexity())

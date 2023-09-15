@@ -13,7 +13,6 @@ def make_ngrams_dict(processed_sentences, n):
     counts = {}
     for sentence in processed_sentences:
         counts = counter(sentence, n, counts)
-    
     return counts
 
 def get_ngrams_list_from_sentence(sentence, n):
@@ -27,11 +26,9 @@ def counter(data, n, count_gram_dict):
     vocab = data.split()
     gram_gram = [""]
     gram_gram.extend(vocab[:n-1])
-
     for i in range (n, len(vocab)+1):
         gram_gram.pop(0)
         gram_gram.append(vocab[i-1])
         gram_element = " ".join(gram_gram)
         count_gram_dict[gram_element] = count_gram_dict.get(gram_element,0) + 1
-
     return count_gram_dict
