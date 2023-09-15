@@ -31,9 +31,8 @@ class LanguageModel(object):
                 return ngram_count / n_minus_one_gram_count
             elif(self.smoothing == 'laplace'):
                 return (ngram_count + 1) / (n_minus_one_gram_count + self.vocab_size)
-            elif(isinstance(self.smoothing, int) or isinstance(self.smoothing, float)):     #ADD-K Smoothing
+            else:                                                                       #ADD-K Smoothing
                 return (ngram_count + self.smoothing) / (n_minus_one_gram_count + self.vocab_size * self.smoothing)
-            
         else:
             goodTuringNgramCount = goodTuring_ngram_count(ngram_string, self.ngrams_dict, self.freq_dict)
             num_ngrams_in_training_corpus = len(self.ngrams_dict)

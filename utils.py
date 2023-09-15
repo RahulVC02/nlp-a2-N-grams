@@ -40,7 +40,7 @@ def freq_calc(count_gram_dict):
     return freq_dict
 
 def goodTuring_ngram_count(ngram, count_gram_dict, freq_dict):
-    c = count_gram_dict[ngram]
+    c = count_gram_dict.get(ngram,0)
     if c > 10:    #done for maintaining consistency after the count becomes large, can be done for different values for different models
         return c - 0.75
     elif (c == 0):
