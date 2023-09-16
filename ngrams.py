@@ -1,6 +1,7 @@
 import math
 from utils import preprocess, make_ngrams_dict, get_ngrams_list_from_sentence, freq_calc, goodTuring_ngram_count
 
+
 class LanguageModel(object):
     def __init__(self, train_data, test_data, n, smoothing=None):
         self.n = n
@@ -28,7 +29,11 @@ class LanguageModel(object):
                 n_minus_one_gram_count = self.vocab_size
             
             if(self.smoothing is None):
-                return ngram_count / n_minus_one_gram_count
+                try:
+                    prob = ngram_count / n_minus_one_gram_count
+                    return prob
+                except ZeroDivisionError:
+                    return None
             elif(self.smoothing == 'laplace'):
                 return (ngram_count + 1) / (n_minus_one_gram_count + self.vocab_size)
             else:                                                                       #ADD-K Smoothing
@@ -45,7 +50,10 @@ class LanguageModel(object):
             sentence_log_probability = 0
             constc = -1/N
             for ngram in ngrams_list:
-                sentence_log_probability += math.log10(self._predict_ngram_prob(ngram))
+                prob = self._predict_ngram_prob(ngram)
+                if(prob == 0 or prob is None):
+                    return None
+                sentence_log_probability += math.log10(prob)
             return constc * sentence_log_probability
         else:
             sentence_perplexity = 1
@@ -58,5 +66,8 @@ class LanguageModel(object):
         num_sentences = len(test_sentences)
         total_perplexity = 0
         for sentence in test_sentences:
-            total_perplexity += self._get_sentence_perplexity(sentence, log)
+            sentence_perplexity = self._get_sentence_perplexity(sentence, log)
+            if(sentence_perplexity is None):
+                return "Infinite"
+            total_perplexity += sentence_perplexity
         return total_perplexity / num_sentences
