@@ -1,5 +1,6 @@
 import pandas as pd
 from ngrams import LanguageModel
+from matplotlib import pyplot as plt
 
 all_sentences = pd.read_csv('data/final_sentences_final.csv', header=None)
 all_sentences = all_sentences.iloc[:,0]
@@ -13,8 +14,8 @@ all_sentences = all_sentences.sample(frac=1, random_state=42)
 num_train = int(len(all_sentences) * split_ratio)
 
 #actual train and test data
-train_data = all_sentences[:num_train]
-test_data = all_sentences[num_train:]
+train_data = all_sentences[:90000]
+test_data = train_data
 # test_data = all_sentences
 
 
@@ -29,24 +30,30 @@ calculate_log_perplexity = True
 current_smoothing = None
 print("Smoothing : ", current_smoothing)
 
-#ngram models
+arr = []
 unigram_model = LanguageModel(train_data, test_data, 1, smoothing = current_smoothing)
-print("Unigram Log Perplexity: ", unigram_model.get_total_perplexity(log=calculate_log_perplexity))
+arr.append(unigram_model.get_total_perplexity(log=calculate_log_perplexity))
 
 bigram_model = LanguageModel(train_data, test_data, 2, smoothing = current_smoothing)
-print("Bigram Log Perplexity: ", bigram_model.get_total_perplexity(log=calculate_log_perplexity))
+arr.append(bigram_model.get_total_perplexity(log=calculate_log_perplexity))
 
 trigram_model = LanguageModel(train_data, test_data, 3, smoothing = current_smoothing)
-print("Trigram Log Perplexity: ", trigram_model.get_total_perplexity(log=calculate_log_perplexity))
+arr.append(trigram_model.get_total_perplexity(log=calculate_log_perplexity))
 
 quadgram_model = LanguageModel(train_data, test_data, 4, smoothing = current_smoothing)
-print("Quadgram Log Perplexity: ", quadgram_model.get_total_perplexity(log=calculate_log_perplexity))
+arr.append(quadgram_model.get_total_perplexity(log=calculate_log_perplexity))
 
 pentagram_model = LanguageModel(train_data, test_data, 5, smoothing = current_smoothing)
-print("Pentagram Log Perplexity: ", pentagram_model.get_total_perplexity(log=calculate_log_perplexity))
+arr.append(pentagram_model.get_total_perplexity(log=calculate_log_perplexity))
 
 hexagram_model = LanguageModel(train_data, test_data, 6, smoothing = current_smoothing)
-print("Hexagram Log Perplexity: ", hexagram_model.get_total_perplexity(log=calculate_log_perplexity))
+arr.append(hexagram_model.get_total_perplexity(log=calculate_log_perplexity))
 
 septagram_model = LanguageModel(train_data, test_data, 7, smoothing = current_smoothing)
-print("Septagram Log Perplexity: ", septagram_model.get_total_perplexity(log=calculate_log_perplexity))
+arr.append(septagram_model.get_total_perplexity(log=calculate_log_perplexity))
+
+p = plt.plot(arr)
+plt.xlabel("N")
+plt.ylabel("log Perplexity")
+plt.title("No Smoothing (Test data = Train data)")
+plt.show()
