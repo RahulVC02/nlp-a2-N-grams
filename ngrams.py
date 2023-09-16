@@ -9,24 +9,27 @@ class LanguageModel(object):
         self.preprocessed_sentences = preprocess(train_data, n)
         self.preprocessed_test_sentences = preprocess(test_data, n)
         self.vocab = make_ngrams_dict(self.preprocessed_sentences, 1)
+        self.corpus_size = sum(list(self.vocab.values()))
         self.vocab_size = len(self.vocab)
         self.ngrams_dict = make_ngrams_dict(self.preprocessed_sentences, n)
         self.freq_dict = freq_calc(self.ngrams_dict)
         if(n==1):
             self.n_minus_one_grams_dict = {}
+            self.freq_dict_minus1gram = {}
         else:
             self.n_minus_one_grams_dict = make_ngrams_dict(self.preprocessed_sentences, n-1)
+            self.freq_dict_minus1gram = freq_calc(self.n_minus_one_grams_dict)
     
     def _predict_ngram_prob(self, ngram):
         ngram_string = " ".join(ngram)
+        n_minus_one_gram = ngram[:-1]
+        n_minus_one_gram_string = " ".join(n_minus_one_gram)
         if(self.smoothing is None or self.smoothing != 'goodTuring'):
             ngram_count = self.ngrams_dict.get(ngram_string, 0)
             if(self.n>1):
-                n_minus_one_gram = ngram[:-1]
-                n_minus_one_gram_string = " ".join(n_minus_one_gram)
                 n_minus_one_gram_count = self.n_minus_one_grams_dict.get(n_minus_one_gram_string, 0)
             else:
-                n_minus_one_gram_count = self.vocab_size
+                n_minus_one_gram_count = self.corpus_size
             
             if(self.smoothing is None):
                 try:
@@ -40,8 +43,7 @@ class LanguageModel(object):
                 return (ngram_count + self.smoothing) / (n_minus_one_gram_count + self.vocab_size * self.smoothing)
         else:
             goodTuringNgramCount = goodTuring_ngram_count(ngram_string, self.ngrams_dict, self.freq_dict)
-            num_ngrams_in_training_corpus = len(self.ngrams_dict)
-            return goodTuringNgramCount / num_ngrams_in_training_corpus         
+            return goodTuringNgramCount / self.corpus_size         
         
     def _get_sentence_perplexity(self, sentence, log):
         N = len(sentence.split())
