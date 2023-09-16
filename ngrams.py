@@ -9,6 +9,7 @@ class LanguageModel(object):
         self.preprocessed_sentences = preprocess(train_data, n)
         self.preprocessed_test_sentences = preprocess(test_data, n)
         self.vocab = make_ngrams_dict(self.preprocessed_sentences, 1)
+        self.num_words = sum(self.vocab.values())
         self.vocab_size = len(self.vocab)
         self.ngrams_dict = make_ngrams_dict(self.preprocessed_sentences, n)
         self.freq_dict = freq_calc(self.ngrams_dict)
@@ -26,7 +27,7 @@ class LanguageModel(object):
                 n_minus_one_gram_string = " ".join(n_minus_one_gram)
                 n_minus_one_gram_count = self.n_minus_one_grams_dict.get(n_minus_one_gram_string, 0)
             else:
-                n_minus_one_gram_count = self.vocab_size
+                n_minus_one_gram_count = self.num_words
             
             if(self.smoothing is None):
                 try:
@@ -40,7 +41,7 @@ class LanguageModel(object):
                 return (ngram_count + self.smoothing) / (n_minus_one_gram_count + self.vocab_size * self.smoothing)
         else:
             goodTuringNgramCount = goodTuring_ngram_count(ngram_string, self.ngrams_dict, self.freq_dict)
-            num_ngrams_in_training_corpus = len(self.ngrams_dict)
+            num_ngrams_in_training_corpus = sum(self.ngrams_dict.values())
             return goodTuringNgramCount / num_ngrams_in_training_corpus         
         
     def _get_sentence_perplexity(self, sentence, log):
