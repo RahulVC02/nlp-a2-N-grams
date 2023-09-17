@@ -22,7 +22,7 @@ print("No. of Sentences in Train Data : ", len(train_data))
 print("No. of Sentences in Test Data : ", len(test_data))
 
 #possible values for smoothing - unsmoothed, laplace, add-k, goodTuring
-smoothing_values = [None, 'laplace', 0.001, 0.01, 0.1, 0.5, 2, 5, 10, 'goodTuring']
+smoothing_values = [None, 'laplace', 0.001, 0.01, 0.1, 0.5, 2, 5, 10, 'goodTuring','goodTuring with conditional']
 
 #flag to find log perplexity or normal perplexity
 calculate_log_perplexity = True

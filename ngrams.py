@@ -1,5 +1,5 @@
 import math
-from utils import preprocess, make_ngrams_dict, get_ngrams_list_from_sentence, freq_calc, goodTuring_ngram_count
+from utils import *
 
 
 class LanguageModel(object):
@@ -24,7 +24,7 @@ class LanguageModel(object):
         ngram_string = " ".join(ngram)
         n_minus_one_gram = ngram[:-1]
         n_minus_one_gram_string = " ".join(n_minus_one_gram)
-        if(self.smoothing is None or self.smoothing != 'goodTuring'):
+        if(self.smoothing is None or self.smoothing not in ['goodTuring','goodTuring with conditional']):
             ngram_count = self.ngrams_dict.get(ngram_string, 0)
             if(self.n>1):
                 n_minus_one_gram_count = self.n_minus_one_grams_dict.get(n_minus_one_gram_string, 0)
@@ -39,11 +39,15 @@ class LanguageModel(object):
                     return None
             elif(self.smoothing == 'laplace'):
                 return (ngram_count + 1) / (n_minus_one_gram_count + self.vocab_size)
-            else:                                                                       #ADD-K Smoothing
+            else:                                                                                                   #ADD-K Smoothing
                 return (ngram_count + self.smoothing) / (n_minus_one_gram_count + self.vocab_size * self.smoothing)
-        else:
+        elif self.smoothing=='goodTuring':
             goodTuringNgramCount = goodTuring_ngram_count(ngram_string, self.ngrams_dict, self.freq_dict)
-            return goodTuringNgramCount / self.corpus_size         
+            return goodTuringNgramCount / self.corpus_size
+        else:
+            goodTuringNgramCount = interpolated_goodTuring_count(ngram_string, self.ngrams_dict)
+            goodTuringNminusone = self.corpus_size if self.n==1 else interpolated_goodTuring_count(n_minus_one_gram_string, self.n_minus_one_grams_dict)
+            return goodTuringNgramCount / goodTuringNminusone
         
     def _get_sentence_perplexity(self, sentence, log):
         N = len(sentence.split())

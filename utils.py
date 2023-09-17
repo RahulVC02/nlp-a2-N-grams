@@ -47,3 +47,12 @@ def goodTuring_ngram_count(ngram, count_gram_dict, freq_dict):
         return freq_dict[1]
     else:
         return (c+1)*freq_dict.get(c+1,0)/freq_dict[c]
+
+def interpolated_goodTuring_count(ngram, count_gram_dict):
+    c = count_gram_dict.get(ngram,0)
+    if c > 10:    #done for maintaining consistency after the count becomes large, can be done for different values for different models
+        return c - 0.75
+    elif (c == 0):
+        return 0.124
+    else:
+        return c-(0.07*c)
