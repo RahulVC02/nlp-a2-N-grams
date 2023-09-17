@@ -5,17 +5,17 @@ all_sentences = pd.read_csv('data/final_sentences_final.csv', header=None)
 all_sentences = all_sentences.iloc[:,0]
 
 #sanity check
-train_data = all_sentences
-test_data = train_data
+# train_data = all_sentences
+# test_data = train_data
 
-# split_ratio = 0.8
-# all_sentences = all_sentences.sample(frac=1, random_state=42)  
-# num_train = int(len(all_sentences) * split_ratio)
+split_ratio = 0.8
+all_sentences = all_sentences.sample(frac=1, random_state=42)  
+num_train = int(len(all_sentences) * split_ratio)
 
-# #actual train and test data
-# train_data = all_sentences[:num_train]
-# test_data = all_sentences[num_train:]
-# test_data = all_sentences
+#actual train and test data
+train_data = all_sentences[:num_train]
+test_data = all_sentences[num_train:]
+#test_data = all_sentences
 
 
 print("No. of Sentences in Train Data : ", len(train_data))
