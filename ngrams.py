@@ -13,6 +13,7 @@ class LanguageModel(object):
         self.vocab_size = tot_vocab(self.vocab, self.preprocessed_test_sentences)
         self.ngrams_dict = make_ngrams_dict(self.preprocessed_sentences, n)
         self.freq_dict = freq_calc(self.ngrams_dict)
+        self.number_of_ngram = sum(list(self.ngrams_dict.values()))
         if(n==1):
             self.n_minus_one_grams_dict = {}
             self.freq_dict_minus1gram = {}
@@ -43,7 +44,7 @@ class LanguageModel(object):
                 return (ngram_count + self.smoothing) / (n_minus_one_gram_count + self.vocab_size * self.smoothing)
         elif self.smoothing=='goodTuring':
             goodTuringNgramCount = goodTuring_ngram_count(ngram_string, self.ngrams_dict, self.freq_dict, self.vocab_size ** self.n)
-            return goodTuringNgramCount / self.corpus_size
+            return goodTuringNgramCount / self.number_of_ngram
         else:
             goodTuringNgramCount = goodTuring_ngram_count(ngram_string, self.ngrams_dict, self.freq_dict, self.vocab_size ** self.n)
             goodTuringNminusone = self.corpus_size if self.n==1 else goodTuring_ngram_count(n_minus_one_gram_string, self.n_minus_one_grams_dict, self.freq_dict_minus1gram, self.vocab_size ** (self.n -1))

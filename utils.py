@@ -41,7 +41,8 @@ def freq_calc(count_gram_dict):
 
 def goodTuring_ngram_count(ngram, count_gram_dict, freq_dict, tot_grams):
     c = count_gram_dict.get(ngram,0)
-    if c > 100:    #done for maintaining consistency after the count becomes large, can be done for different values for different models
+    if c > 100 or freq_dict.get(c+1,0)==0:    #done for maintaining consistency after the count becomes large, can be done for different values for different models
+                                              #although for our set freq[c+1] was never 0 but put for safety
         return c - 0.75
     elif (c == 0):
         return freq_dict[1]/min((tot_grams - len(count_gram_dict)),1e6)
