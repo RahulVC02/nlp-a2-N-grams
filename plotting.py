@@ -59,6 +59,6 @@ for current_smoothing in smoothing_values[2:9]:
 plt.legend()
 plt.xlabel("N")
 plt.ylabel("log Perplexity")
-plt.title("Good Turing with Conditional")
+plt.title("Add - k")
 plt.show()
 
