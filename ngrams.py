@@ -10,7 +10,7 @@ class LanguageModel(object):
         self.preprocessed_test_sentences = preprocess(test_data, n)
         self.vocab = make_ngrams_dict(self.preprocessed_sentences, 1)
         self.corpus_size = sum(list(self.vocab.values()))
-        self.vocab_size = len(self.vocab)
+        self.vocab_size = tot_vocab(self.vocab, self.preprocessed_test_sentences)
         self.ngrams_dict = make_ngrams_dict(self.preprocessed_sentences, n)
         self.freq_dict = freq_calc(self.ngrams_dict)
         if(n==1):
@@ -42,11 +42,11 @@ class LanguageModel(object):
             else:                                                                                                   #ADD-K Smoothing
                 return (ngram_count + self.smoothing) / (n_minus_one_gram_count + self.vocab_size * self.smoothing)
         elif self.smoothing=='goodTuring':
-            goodTuringNgramCount = goodTuring_ngram_count(ngram_string, self.ngrams_dict, self.freq_dict)
+            goodTuringNgramCount = goodTuring_ngram_count(ngram_string, self.ngrams_dict, self.freq_dict, self.vocab_size ** self.n)
             return goodTuringNgramCount / self.corpus_size
         else:
-            goodTuringNgramCount = interpolated_goodTuring_count(ngram_string, self.ngrams_dict)
-            goodTuringNminusone = self.corpus_size if self.n==1 else interpolated_goodTuring_count(n_minus_one_gram_string, self.n_minus_one_grams_dict)
+            goodTuringNgramCount = goodTuring_ngram_count(ngram_string, self.ngrams_dict, self.freq_dict, self.vocab_size ** self.n)
+            goodTuringNminusone = self.corpus_size if self.n==1 else goodTuring_ngram_count(n_minus_one_gram_string, self.n_minus_one_grams_dict, self.freq_dict_minus1gram, self.vocab_size ** (self.n -1))
             return goodTuringNgramCount / goodTuringNminusone
         
     def _get_sentence_perplexity(self, sentence, log):
